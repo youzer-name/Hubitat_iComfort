@@ -16,6 +16,8 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  *  Last Updated : 1/05/2019 by Brian Spranger
+ *  
+ * Updated 2025-11-3 by @youzer-name <youzer-name.sage661@passmail.net> - modify initial API call when installing app
  *
  */
 definition(
@@ -114,22 +116,26 @@ def getSelectedDevices( settingsName ) {
 /* Access Management */
 private loginCheck() { 
 	def returnval = 0
-	apiPut("/DBAcessService.svc/ValidateUser", [query: [UserName: settings.username, lang_nbr: "1"]] ) { response ->
-		if (response.status == 200) {
-			if (response.data.msg_code == "SUCCESS")
-			{
+	def fullUrl = "${getApiURL()}/DBAcessService.svc/GetSystemsInfo?userID=${settings.username}"
+	def apiParams = [
+		uri: fullUrl,
+		headers: [Authorization: getApiAuth()],
+		ignoreSSLIssues: true
+	]
+	logDebug "Sending login request to: ${fullUrl}"
+	try {
+		httpGet(apiParams) { response ->
+			logDebug "Login response: ${response.data}"
+			if (response.status == 200 && response.data?.Systems) {
 				returnval = 1
 			}
-			else
-			{
-				returnval =  0
-			}
-		} else {
-			returnval = 0
 		}
+	} catch (Exception e) {
+		log.error "Login failed: ${e.message}"
 	}
 	return returnval
 }
+
 
 // Listing all the thermostats you have in iComfort
 private getThermostatList() { 	    
