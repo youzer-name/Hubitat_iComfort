@@ -1,0 +1,16 @@
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore node_modules and Python cache (if ever added)
+node_modules/
+__pycache__/
+
+# Ignore logs
+*.log
+
+# Ignore VSCode settings
+.vscode/
+
+# Ignore compiled Groovy classes
+*.class
