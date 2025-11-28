@@ -18,6 +18,7 @@
  *  Last Updated : 1/05/2019 by Brian Spranger
  *  
  * Updated 2025-11-3 by @youzer-name <youzer-name.sage661@passmail.net> - modify initial API call when installing app
+ * Updated 2025-11-28 by @youzer-name <youzer-name.sage661@passmail.net> - fix API call for away / cancel away 
  *
  */
 definition(
@@ -487,14 +488,16 @@ def setAway(childDevice, awayStatus) {
 	def awayMode = ((awayStatus.toString().equals("away"))?"1":"0")
 	//Retrieve program info
 	state.data[childDevice.deviceNetworkId].awayMode = awayMode.toString()
-	
+
 	def apiQuery = [ 
 		awayMode: awayMode.toString(),
 		ZoneNumber: getDeviceZone(childDevice),
 		TempScale: (getTemperatureScale()=="F")?0:1,
-		GatewaySN: getDeviceGatewaySN(childDevice) 
+		GatewaySN: getDeviceGatewaySN(childDevice),
+		heatsetpoint: state.data[childDevice.deviceNetworkId]?.heatingSetpoint,
+		coolsetpoint: state.data[childDevice.deviceNetworkId]?.coolingSetpoint
 	]
-	
+
 	//Set Thermostat Program
 	apiPut("/DBAcessService.svc/SetAwayModeNew", [contentType: "application/json; charset=utf-8", requestContentType: "application/json; charset=utf-8", query: apiQuery]) { response ->
 		if (response.status == 200) {
